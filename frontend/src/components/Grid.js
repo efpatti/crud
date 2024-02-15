@@ -4,6 +4,15 @@ import styled from "styled-components";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { toast } from "react-toastify";
 
+// Função para formatar a data no formato "DD/MM/YYYY"
+const formatarData = (data) => {
+  const dataObj = new Date(data);
+  const dia = String(dataObj.getDate()).padStart(2, "0");
+  const mes = String(dataObj.getMonth() + 1).padStart(2, "0"); // Mês é base 0
+  const ano = dataObj.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+};
+
 const Table = styled.table`
   width: 100%;
   background-color: #fff;
@@ -76,7 +85,7 @@ const Grid = ({ users, setUsers, setOnEdit }) => {
               {item.phone}
             </Td>
             <Td width="20%" onlyWeb>
-              {item.birth_day}
+              {formatarData(item.birth_day)}
             </Td>
             <Td alignCenter width="5%">
               <FaEdit onClick={() => handleEdit(item)} />

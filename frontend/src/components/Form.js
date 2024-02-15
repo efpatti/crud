@@ -47,7 +47,9 @@ const Form = ({ getUsers, onEdit, setOnEdit }) => {
       user.name.value = onEdit.name;
       user.email.value = onEdit.email;
       user.phone.value = onEdit.phone;
-      user.birth_day.value = onEdit.birth_day;
+      // Formate a data no formato "YYYY-MM-DD"
+      const birthDay = new Date(onEdit.birth_day).toISOString().split("T")[0];
+      user.birth_day.value = birthDay;
     }
   }, [onEdit]);
 
