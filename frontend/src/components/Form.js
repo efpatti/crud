@@ -1,16 +1,17 @@
 import axios from "axios";
-import React, { useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 
 const FormContainer = styled.form`
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   flex-wrap: wrap;
   background-color: #fff;
   padding: 20px;
   box-shadow: 0px 0px 5px #ccc;
+  border-radius: 5px;
 `;
 
 const InputArea = styled.div`
@@ -44,12 +45,9 @@ const Form = ({ getUsers, onEdit, setOnEdit }) => {
   useEffect(() => {
     if (onEdit) {
       const user = ref.current;
-      user.name.value = onEdit.name;
       user.email.value = onEdit.email;
       user.phone.value = onEdit.phone;
-      // Formate a data no formato "YYYY-MM-DD"
-      const birthDay = new Date(onEdit.birth_day).toISOString().split("T")[0];
-      user.birth_day.value = birthDay;
+      user.birth_day.value = onEdit.birth_day;
     }
   }, [onEdit]);
 
@@ -58,60 +56,53 @@ const Form = ({ getUsers, onEdit, setOnEdit }) => {
 
     const user = ref.current;
 
-    if (
-      !user.name.value ||
-      !user.email.value ||
-      !user.phone.value ||
-      !user.birth_day.value
-    ) {
+    if (!user.email.value || !user.phone.value || !user.birth_day.value) {
       return toast.warn("Preencha todos os campos!");
     }
-    try {
-      if (onEdit) {
-        await axios.put(`http://localhost:8800/${onEdit.id}`, {
-          name: user.name.value,
+
+    if (onEdit) {
+      await axios
+        .put("http://localhost:8800/" + onEdit.id, {
           email: user.email.value,
           phone: user.phone.value,
           birth_day: user.birth_day.value,
-        });
-        toast.success("Usuário atualizado com sucesso.");
-      } else {
-        await axios.post("http://localhost:8800", {
-          name: user.name.value,
+        })
+        .then(({ data }) => toast.success(data))
+        .catch(({ data }) => toast.error(data));
+    } else {
+      await axios
+        .post("http://localhost:8800", {
           email: user.email.value,
           phone: user.phone.value,
           birth_day: user.birth_day.value,
-        });
-        toast.success("Usuário criado com sucesso.");
-      }
-      getUsers();
-      user.name.value = "";
-      user.email.value = "";
-      user.phone.value = "";
-      user.birth_day.value = "";
-      setOnEdit(null);
-    } catch (error) {
-      toast.error("Erro ao salvar usuário");
+        })
+        .then(({ data }) => toast.success(data))
+        .catch(({ data }) => toast.error(data));
     }
+
+    user.email.value = "";
+    user.phone.value = "";
+    user.birth_day.value = "";
+
+    setOnEdit(null);
+    getUsers();
   };
+
   return (
     <FormContainer ref={ref} onSubmit={handleSubmit}>
       <InputArea>
-        <Label>Nome</Label>
-        <Input name="name"></Input>
-      </InputArea>
-      <InputArea>
-        <Label>Email</Label>
-        <Input name="email" type="email"></Input>
+        <Label>E-mail</Label>
+        <Input name="email" type="email" />
       </InputArea>
       <InputArea>
         <Label>Telefone</Label>
-        <Input name="phone"></Input>
+        <Input name="phone" />
       </InputArea>
       <InputArea>
         <Label>Data de Nascimento</Label>
-        <Input name="birth_day" type="date"></Input>
+        <Input name="birth_day" type="date" />
       </InputArea>
+
       <Button type="submit">SALVAR</Button>
     </FormContainer>
   );
