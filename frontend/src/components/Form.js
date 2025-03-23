@@ -1,111 +1,99 @@
 import axios from "axios";
 import React, { useEffect, useRef } from "react";
-import styled from "styled-components";
 import { toast } from "react-toastify";
 
-const FormContainer = styled.form`
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-  background-color: #fff;
-  padding: 20px;
-  box-shadow: 0px 0px 5px #ccc;
-  border-radius: 5px;
-`;
-
-const InputArea = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Input = styled.input`
-  width: 120px;
-  padding: 0 10px;
-  border: 1px solid #bbb;
-  border-radius: 5px;
-  height: 40px;
-`;
-
-const Label = styled.label``;
-
-const Button = styled.button`
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 5px;
-  border: none;
-  background-color: #2c73d2;
-  color: white;
-  height: 42px;
-`;
-
 const Form = ({ getUsers, onEdit, setOnEdit }) => {
-  const ref = useRef();
+ const ref = useRef();
 
-  useEffect(() => {
-    if (onEdit) {
-      const user = ref.current;
-      user.email.value = onEdit.email;
-      user.phone.value = onEdit.phone;
-      user.birth_day.value = onEdit.birth_day;
-    }
-  }, [onEdit]);
+ useEffect(() => {
+  if (onEdit) {
+   const user = ref.current;
+   user.email.value = onEdit.email;
+   user.phone.value = onEdit.phone;
+   user.birth_day.value = onEdit.birth_day;
+  }
+ }, [onEdit]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const user = ref.current;
+  const user = ref.current;
 
-    if (!user.email.value || !user.phone.value || !user.birth_day.value) {
-      return toast.warn("Preencha todos os campos!");
-    }
+  if (!user.email.value || !user.phone.value || !user.birth_day.value) {
+   return toast.warn("Preencha todos os campos!");
+  }
 
-    if (onEdit) {
-      await axios
-        .put("http://localhost:8800/" + onEdit.id, {
-          email: user.email.value,
-          phone: user.phone.value,
-          birth_day: user.birth_day.value,
-        })
-        .then(({ data }) => toast.success(data))
-        .catch(({ data }) => toast.error(data));
-    } else {
-      await axios
-        .post("http://localhost:8800", {
-          email: user.email.value,
-          phone: user.phone.value,
-          birth_day: user.birth_day.value,
-        })
-        .then(({ data }) => toast.success(data))
-        .catch(({ data }) => toast.error(data));
-    }
+  try {
+   if (onEdit) {
+    const { data } = await axios.put(`http://localhost:8800/${onEdit.id}`, {
+     email: user.email.value,
+     phone: user.phone.value,
+     birth_day: user.birth_day.value,
+    });
+    toast.success(data);
+   } else {
+    const { data } = await axios.post("http://localhost:8800", {
+     email: user.email.value,
+     phone: user.phone.value,
+     birth_day: user.birth_day.value,
+    });
+    toast.success(data);
+   }
 
-    user.email.value = "";
-    user.phone.value = "";
-    user.birth_day.value = "";
+   user.email.value = "";
+   user.phone.value = "";
+   user.birth_day.value = "";
 
-    setOnEdit(null);
-    getUsers();
-  };
+   setOnEdit(null);
+   getUsers();
+  } catch (error) {
+   toast.error("Erro ao salvar usuário");
+  }
+ };
 
-  return (
-    <FormContainer ref={ref} onSubmit={handleSubmit}>
-      <InputArea>
-        <Label>E-mail</Label>
-        <Input name="email" type="email" />
-      </InputArea>
-      <InputArea>
-        <Label>Telefone</Label>
-        <Input name="phone" />
-      </InputArea>
-      <InputArea>
-        <Label>Data de Nascimento</Label>
-        <Input name="birth_day" type="date" />
-      </InputArea>
+ return (
+  <form
+   className="flex flex-col gap-6 max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg"
+   ref={ref}
+   onSubmit={handleSubmit}
+  >
+   <div className="flex flex-col">
+    <label className="font-semibold text-gray-700">E-mail</label>
+    <input
+     name="email"
+     type="email"
+     className="w-full p-4 mt-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+     required
+    />
+   </div>
 
-      <Button type="submit">SALVAR</Button>
-    </FormContainer>
-  );
+   <div className="flex flex-col">
+    <label className="font-semibold text-gray-700">Telefone</label>
+    <input
+     name="phone"
+     className="w-full p-4 mt-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+     required
+    />
+   </div>
+
+   <div className="flex flex-col">
+    <label className="font-semibold text-gray-700">Data de Nascimento</label>
+    <input
+     name="birth_day"
+     type="date"
+     className="w-full p-4 mt-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+     required
+    />
+   </div>
+
+   <button
+    type="submit"
+    className="mt-6 bg-indigo-500 text-white py-3 rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-300"
+   >
+    {onEdit ? "Atualizar" : "Salvar"}
+   </button>
+  </form>
+ );
 };
 
 export default Form;
